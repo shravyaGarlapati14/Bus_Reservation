@@ -1,0 +1,22 @@
+# Build
+/target/
+
+# IDE
+/.idea/
+/.project
+/.classpath
+/.settings/
+.vscode/
+
+# OS / logs
+*.log
+.DS_Store
+
+# Secrets
+.env
+
+# Webapp libs managed by Maven (don’t commit jars here)
+src/main/webapp/WEB-INF/lib/
+
+# Node (just in case)
+node_modules/
