@@ -20,3 +20,4 @@ src/main/webapp/WEB-INF/lib/
 
 # Node (just in case)
 node_modules/
+/build/
