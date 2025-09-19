@@ -1,183 +1,113 @@
-# Bus Reservation System 🚌
+Bus Reservation System 🚌
+A web-based bus ticket booking app with user signup/login, search & booking, booking history, and basic admin views.
+Built with Java Servlets/JSP, MySQL, and Maven, and runs locally via Jetty (no separate Tomcat install required).
 
-A comprehensive web-based bus ticket booking system developed during my 2nd year, 2nd semester project. This system provides a complete solution for bus ticket reservations with user authentication, booking management, and administrative features.
+Note: This repository is set up for local development with a .env file for database configuration and Java 17 compilation.
 
-## 🌐 Live Demo
+Features
+Users: Registration, login, password reset, booking history
+Bookings: Search buses, create/view tickets
+Admin: View all tickets, basic user oversight
+UX: Responsive JSP pages with simple styling
+Tech Stack
+Backend: Java 17, Servlets/JSP (Servlet API 4.0)
+Build/Run: Maven, Jetty Maven Plugin
+Database: MySQL 8.x (JDBC)
+Libs: JSTL, iText (PDF)
+Prerequisites
+Java 17 (JDK)
+Maven 3.8+
+MySQL 8.x
+Verify:
 
-� **[Try it Live!](https://project.anirudh.engineer/EasyBus)** - Experience the Bus Reservation System in action
+java -version
+mvn -version
+mysql --version
+Database Setup
+Create the DB and load seed data:
 
-📢 **Note:** This application is self-hosted and may not always be available online. 
+mysql -u root -p -e "CREATE DATABASE bus_reservation CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql -u root -p bus_reservation < bus_reservation.sql
+# optional check
+mysql -u root -p -e "USE bus_reservation; SHOW TABLES;"
+Configuration (Environment Variables)
+Create a .env file in the project root:
 
-🔗 **Need Help or Demo Unavailable?** Connect with me on [LinkedIn](https://www.linkedin.com/in/k-m-g-anirudh/) and I'll be happy to give you a personalized live demonstration of the system!
+DB_URL=jdbc:mysql://localhost:3306/bus_reservation?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+DB_USER=root
+DB_PASS=your_mysql_password
+.env is git-ignored. The app reads DB_URL, DB_USER, DB_PASS via environment variables or JVM properties.
+If not provided, sensible defaults are used (localhost DB, user root, empty password).
 
-## 🚀 Features
+PowerShell (local only) – load .env for the current terminal session:
 
-### User Features
-- **User Registration & Login** - Secure user authentication system
-- **Bus Search & Booking** - Search available buses and book tickets
-- **Booking History** - View past and current bookings
-- **Password Reset** - Secure password recovery system
+Get-Content .env | ForEach-Object {
+  if ($_ -match '^\s*#' -or $_ -notmatch '=') { return }
+  $name,$value = $_ -split '=',2
+  [System.Environment]::SetEnvironmentVariable($name.Trim(), $value.Trim(), 'Process')
+}
+(Alternatively, pass them as JVM properties when running Maven):
 
-### Admin Features
-- **Admin Dashboard** - Comprehensive administrative panel
-- **Ticket Management** - View and manage all ticket bookings
-- **User Management** - Monitor user activities and registrations
+mvn -DDB_URL="jdbc:mysql://localhost:3306/bus_reservation?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC" \
+    -DDB_USER=root -DDB_PASS="your_mysql_password" jetty:run
+Run Locally (Jetty)
 
-### General Features
-- **Responsive Design** - Works seamlessly on desktop and mobile devices
+mvn clean package -DskipTests
+mvn jetty:run
+Open: http://localhost:8080/Bus_Reservation_System
 
-## 🛠️ Technologies Used
+If port 8080 is busy:
 
-### Frontend
-- **HTML5** - Structure and content
-- **CSS3** - Styling and responsive design
-- **JavaScript** - Interactive user interface and client-side validation
+mvn -Djetty.http.port=8081 jetty:run
+# then open http://localhost:8081/Bus_Reservation_System
+Build a WAR (optional, for Tomcat 9+)
 
-### Backend
-- **Java Servlets** - Server-side logic and request handling
-- **JSP (JavaServer Pages)** - Dynamic web page generation
+mvn clean package
+Deploy target/Bus_Ticketing_System.war to your Tomcat webapps/ directory and start Tomcat.
 
-### Database
-- **MySQL** - Relational database for data storage
-- **JDBC** - Database connectivity
+Troubleshooting
+Communications link failure / cannot connect to MySQL
 
-### Build Tools
-- **Maven** - Project management and dependency resolution
-- **Apache Tomcat** - Web server and servlet container
+Ensure MySQL service is running (Windows services.msc → MySQL80)
 
-## 📁 Project Structure
+Verify DB_URL, DB_USER, DB_PASS
 
-```
-Bus_Reservation_System/
-├── src/
-│   └── main/
-│       ├── java/              # Java Servlets
-│       │   ├── BookingServlet.java
-│       │   ├── LoginVerification.java
-│       │   ├── SignupServlet.java
-│       │   ├── HistoryRetrieval.java
-│       │   └── ...
-│       └── webapp/            # Web Resources
-│           ├── *.html         # HTML pages
-│           ├── *.css          # Stylesheets
-│           ├── images/        # Project images
-│           └── WEB-INF/       # Configuration files
-├── target/                    # Compiled classes
-├── bus_reservation.sql       # Database schema and sample data
-├── Jenkinsfile               # CI/CD pipeline configuration
-├── pom.xml                   # Maven configuration
-└── README.md                 # Project documentation
-```
+Use the provided flags in DB_URL: useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
 
-## 🗄️ Database Schema
+Access denied for user
 
-The system uses MySQL database with the following main entities:
-- **Users** - User authentication and profile information
-- **Buses** - Bus details and route information
-- **Bookings** - Ticket booking records
-- **Routes** - Bus route and schedule data
+Credentials incorrect; test via:
 
-📁 **Database Export**: The complete database schema with sample data is available in `bus_reservation.sql` for easy setup and testing.
+mysql -u root -p
+ClassNotFoundException: com.mysql.cj.jdbc.Driver
 
-## 🚦 Getting Started
+Confirm mysql-connector-java is in pom.xml and rerun mvn clean package.
 
-### Prerequisites
-- Java JDK 8 or higher
-- Apache Tomcat 9.0+
-- MySQL 8.0+
-- Maven 3.6+
-- IDE (Eclipse/IntelliJ IDEA)
+Port already in use (8080)
 
-### Installation Steps
+Run Jetty on a different port:
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/anirudh645/Bus_Reservation_System.git
-   cd Bus_Reservation_System
-   ```
+mvn -Djetty.http.port=8081 jetty:run
+Duplicate JDBC jars warnings
 
-2. **Set up MySQL Database**
-   ```sql
-   CREATE DATABASE bus_reservation;
-   USE bus_reservation;
-   
-   -- Import the provided database schema and sample data
-   SOURCE bus_reservation.sql;
-   ```
+Remove any ojdbc*.jar from src/main/webapp/WEB-INF/lib/ and rely on Maven-managed dependencies.
 
-3. **Configure Database Connection**
-   - Update database credentials in your servlet configuration
-   - Ensure MySQL connector is included in dependencies
+Security Notes
+Do not commit secrets. .env is ignored by default.
 
-4. **Build the Project**
-   ```bash
-   mvn clean compile
-   ```
+For production hardening, add password hashing (e.g., BCrypt) and a JDBC connection pool.
 
-5. **Deploy to Tomcat**
-   ```bash
-   mvn package
-   # Deploy the generated WAR file to Tomcat webapps directory
-   ```
+Roadmap / Nice-to-haves
+Password hashing & input validation
 
-6. **Access the Application**
-   - Open your browser and navigate to: `http://localhost:8080/Bus_Reservation_System`
+DAO/Service refactor + HikariCP pooling
 
+Better error pages and logging
 
-### Home Page
-- Clean and intuitive interface for bus search
-- Featured routes and promotional content
+Role-based access control for admin pages
 
-### Booking Interface
-- Easy-to-use booking form
+Docker Compose (app + MySQL)
 
-### User Dashboard
-- Personal booking history
-- Quick rebooking options
-
-## 🔧 Configuration
-
-### Database Configuration
-Update the database connection parameters in your servlet files:
-```java
-String url = "jdbc:mysql://localhost:3306/bus_reservation";
-String username = "your_username";
-String password = "your_password";
-```
-
-### Server Configuration
-Ensure Tomcat is configured with proper memory settings for optimal performance.
-
-## 🤝 Contributing
-
-This project was developed as an academic assignment. While it's not actively maintained, you're welcome to:
-- Fork the repository
-- Submit bug reports
-- Suggest improvements
-- Use it as a reference for your own projects
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
-## 👨‍💻 Author
-
-**Anirudh**
-- GitHub: [@anirudh645](https://github.com/anirudh645)
-- Project: [Bus Reservation System](https://github.com/anirudh645/Bus_Reservation_System)
-
-## 📚 Academic Context
-
-This project was developed during the 2nd year, 2nd semester as part of the curriculum to demonstrate:
-- Full-stack web development skills
-- Database design and integration
-- Server-side programming with Java
-- User interface design and implementation
-- Project management and version control
-
-
----
-
-⭐ **If you find this project helpful, please consider giving it a star!**
-
-*Developed with ❤️ as part of academic curriculum*
+License
+This project is provided under the MIT License.
+© Sai Shravya Garlapati.
